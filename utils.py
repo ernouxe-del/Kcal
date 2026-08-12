@@ -1,8 +1,8 @@
 import requests
 
 # Remplacez par vos identifiants Edamam
-EDAMAM_APP_ID = "VOTRE_APP_ID"
-EDAMAM_APP_KEY = "VOTRE_APP_KEY"
+EDAMAM_APP_ID = 3c6dfc2f
+EDAMAM_APP_KEY = 0b4ae419d3f79aa693c4439ac9d3dc02
 
 def get_nutrition(query):
     """
