@@ -1,24 +1,42 @@
 import requests
 
-# Remplacez par votre clé API (CalorieNinjas est gratuit et simple)
-API_KEY = "VOTRE_CLE_API" 
-API_URL = "https://api.calorieninjas.com/v1/nutrition?query="
+# Remplacez par vos identifiants Edamam
+EDAMAM_APP_ID = "VOTRE_APP_ID"
+EDAMAM_APP_KEY = "VOTRE_APP_KEY"
 
 def get_nutrition(query):
-    header = {'X-Api-Key': API_KEY}
-    response = requests.get(API_URL + query, headers=header)
-    if response.status_code == 200:
-        data = response.json()
-        if data['items']:
-            # On additionne si plusieurs aliments sont listés
-            totals = {'calories': 0, 'protein_g': 0, 'carbohydrates_total_g': 0, 'fat_total_g': 0}
-            for item in data['items']:
-                for key in totals:
-                    totals[key] += item[key]
-            return totals
-    return None
+    """
+    Analyse une phrase (ex: '100g chicken and 2 apples') 
+    via l'API Edamam Nutrition Analysis.
+    """
+    url = "https://api.edamam.com/api/nutrition-data"
+    
+    params = {
+        'app_id': EDAMAM_APP_ID,
+        'app_key': EDAMAM_APP_KEY,
+        'ingr': query
+    }
+    
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Edamam renvoie 0 calories si l'aliment n'est pas reconnu
+            if data.get('calories', 0) > 0:
+                return {
+                    'calories': data['calories'],
+                    'protein_g': data['totalNutrients'].get('PROCNT', {}).get('quantity', 0),
+                    'carbohydrates_total_g': data['totalNutrients'].get('CHOCDF', {}).get('quantity', 0),
+                    'fat_total_g': data['totalNutrients'].get('FAT', {}).get('quantity', 0)
+                }
+        return None
+    except Exception as e:
+        print(f"Erreur API : {e}")
+        return None
 
 def calculate_bmr(weight, height, age, gender):
+    # Formule de Harris-Benedict
     if gender == "Homme":
         return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
     else:
